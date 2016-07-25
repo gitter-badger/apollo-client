@@ -7,6 +7,7 @@ Expect active development and potentially significant breaking changes in the `0
 - Add a stack trace to `ApolloError`. [PR #445](https://github.com/apollostack/apollo-client/pull/445) and [Issue #434](https://github.com/apollostack/apollo-client/issues/434).
 - Fixed an extra log of errors on `query` calls. [PR #445](https://github.com/apollostack/apollo-client/pull/445) and [Issue #423](https://github.com/apollostack/apollo-client/issues/423).
 - Fix repeat calls to a query that includes fragments [PR #447](https://github.com/apollostack/apollo-client/pull/447).
+- Add loading state tracking within Apollo Client in order to simplify the handling of loading state within the view layers. [Issue #342](https://github.com/apollostack/apollo-client/issues/342) and [PR #467](https://github.com/apollostack/apollo-client/pull/467)
 
 ### v0.4.7
 
