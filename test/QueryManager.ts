@@ -3199,7 +3199,7 @@ describe('QueryManager', () => {
       });
     });
 
-    it('should be passed to the observer as false if we are returning partial data', () => {
+    it('should be passed to the observer as true if we are returning partial data', () => {
       const primeQuery = gql`
         query {
           fortuneCookie
@@ -3252,7 +3252,7 @@ describe('QueryManager', () => {
       });
     });
 
-    it('should be passed to the observer as true if we are returning all the data', () => {
+    it('should be passed to the observer as false if we are returning all the data', () => {
       const query = gql`
         query {
           author {
@@ -3276,8 +3276,11 @@ describe('QueryManager', () => {
         store: createApolloStore(),
         reduxRootKey: 'apollo',
       });
-      queryManager.query({ query }).then((result) => {
-        assert(!result.loading);
+      const handle = queryManager.watchQuery({ query, returnPartialData: false });
+      handle.subscribe({
+        next(result) {
+          assert(!result.loading);
+        },
       });
     });
   });
