@@ -518,7 +518,6 @@ describe('client', () => {
           lastName
           __typename
         }
-        __typename
       }`;
 
     const result = {
@@ -533,7 +532,6 @@ describe('client', () => {
         'lastName': 'Smith',
         '__typename': 'Author',
       },
-      '__typename': 'RootQuery',
     };
 
     const networkInterface = mockNetworkInterface(
@@ -572,7 +570,6 @@ describe('client', () => {
           lastName
           __typename
         }
-        __typename
       }`;
     const result = {
       'author': {
@@ -586,7 +583,6 @@ describe('client', () => {
         'lastName': 'Smith',
         '__typename': 'Author',
       },
-      '__typename': 'RootQuery',
     };
     const networkInterface = mockNetworkInterface(
     {
@@ -1460,6 +1456,73 @@ describe('client', () => {
       const initialDefinitions = query.definitions;
       client.query({query, fragments});
       assert.equal(query.definitions, initialDefinitions);
+    });
+  });
+
+  it('should pass a network error correctly on a mutation', (done) => {
+    const mutation = gql`
+      mutation {
+        person {
+          firstName
+          lastName
+        }
+      }`;
+    const data = {
+      person: {
+        firstName: 'John',
+        lastName: 'Smith',
+      },
+    };
+    const networkError = new Error('Some kind of network error.');
+    const client = new ApolloClient({
+      networkInterface: mockNetworkInterface({
+        request: { query: mutation },
+        result: { data },
+        error: networkError,
+      }),
+    });
+
+    client.mutate({ mutation }).then((result) => {
+      done(new Error('Returned a result when it should not have.'));
+    }).catch((error) => {
+      const apolloError = error as ApolloError;
+      assert(apolloError.networkError);
+      assert.equal(apolloError.networkError.message, networkError.message);
+      done();
+    });
+  });
+
+  it('should pass a GraphQL error correctly on a mutation', (done) => {
+    const mutation = gql`
+      mutation {
+        newPerson {
+          person {
+            firstName
+            lastName
+          }
+        }
+      }`;
+    const data = {
+      person: {
+        firstName: 'John',
+        lastName: 'Smith',
+      },
+    };
+    const errors = [ new Error('Some kind of GraphQL error.') ];
+    const client = new ApolloClient({
+      networkInterface: mockNetworkInterface({
+        request: { query: mutation },
+        result: { data, errors },
+      }),
+    });
+    client.mutate({ mutation }).then((result) => {
+      done(new Error('Returned a result when it should not have.'));
+    }).catch((error) => {
+      const apolloError = error as ApolloError;
+      assert(apolloError.graphQLErrors);
+      assert.equal(apolloError.graphQLErrors.length, 1);
+      assert.equal(apolloError.graphQLErrors[0].message, errors[0].message);
+      done();
     });
   });
 });
